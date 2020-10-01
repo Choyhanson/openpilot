@@ -65,28 +65,15 @@ class Calibrator():
     calibration_params = params.get("CalibrationParams")
 
     rpy_init = RPY_INIT
-    valid_blocks = 0
+    valid_blocks = 20
 
-    cached_params = params.get("CarParamsCache")
-    if cached_params is not None:
-      CP = car.CarParams.from_bytes(params.get("CarParams", block=True))
-      cached_params = car.CarParams.from_bytes(cached_params)
-      if cached_params.carFingerprint != CP.carFingerprint:
-        calibration_params = None
-
-    if param_put and calibration_params:
-      try:
-        msg = log.Event.from_bytes(calibration_params)
-        rpy_init = list(msg.liveCalibration.rpyCalib)
-        valid_blocks = msg.liveCalibration.validBlocks
-      except (ValueError, capnp.lib.capnp.KjException):
-        # TODO: remove this after next release
-        calibration_params = json.loads(calibration_params)
-        rpy_init = calibration_params["calib_radians"]
-        valid_blocks = calibration_params['valid_blocks']
-      except Exception:
-        cloudlog.exception("CalibrationParams file found but error encountered")
-
+    # if param_put and calibration_params:
+    #   try:
+    #     calibration_params = json.loads(calibration_params)
+    #     rpy_init = calibration_params["calib_radians"]
+    #     valid_blocks = calibration_params['valid_blocks']
+    #   except Exception:
+    #     cloudlog.exception("CalibrationParams file found but error encountered")
     self.reset(rpy_init, valid_blocks)
     self.update_status()
 
